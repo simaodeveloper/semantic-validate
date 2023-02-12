@@ -1,0 +1,1 @@
+export { pipe, getType } from './utils';

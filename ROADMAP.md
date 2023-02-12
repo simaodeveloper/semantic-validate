@@ -1,5 +1,9 @@
-- [] add messages
-- [] handle errors
-- [] add unit tests
-- [] identify more scenarios to coverage more
-- [] block main branch to receive directly merge, just for PRs
+- add messages
+- handle errors
+- add unit tests
+- identify more scenarios to coverage more
+    - default validations as cpf, phone...
+    - custom validation
+    - dependsOn method in schema
+    - event for error and success for each field
+    - method for masks like schema 

@@ -1,9 +1,21 @@
 {
+    "extends": "@tsconfig/recommended/tsconfig.json",
     "compilerOptions": {
-        "target": "esnext",
+        "target": "ESNext",
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "ESNext.WeakRef"
+        ],
+        "types": ["node", "jest"],
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "moduleResolution": "node",
-        "module": "ESNext"
-    }
+        "module": "ESNext",
+        "strict": true,
+    },
+    "include": [
+        "**/*.ts",
+        "./tests/config/jest-setup.ts"
+    ]
 }

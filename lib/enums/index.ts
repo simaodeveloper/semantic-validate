@@ -1,4 +1,11 @@
-enum ButtonAttributes {
+export enum Fields {
+    button='button',
+    input='input',
+    textarea='textarea',
+    select='select',
+}
+
+export enum ButtonAttributes {
     disabled,
     form,
     name,
@@ -6,7 +13,7 @@ enum ButtonAttributes {
     value,
 }
 
-enum CheckboxAttributes {
+export enum CheckboxAttributes {
     checked,
     disabled,
     form,
@@ -16,7 +23,7 @@ enum CheckboxAttributes {
     value,
 }
 
-enum ColorAttributes {
+export enum ColorAttributes {
     autocomplete,
     disabled,
     form,
@@ -26,22 +33,7 @@ enum ColorAttributes {
     value,
 }
 
-enum DateAttributes {
-    autocomplete,
-    disabled,
-    form,
-    list,
-    max,
-    min,
-    name,
-    readonly,
-    required,
-    step,
-    type,
-    value,
-}
-
-enum DatetimeLocalAttributes {
+export enum DateAttributes {
     autocomplete,
     disabled,
     form,
@@ -56,7 +48,22 @@ enum DatetimeLocalAttributes {
     value,
 }
 
-enum EmailAttributes {
+export enum DatetimeLocalAttributes {
+    autocomplete,
+    disabled,
+    form,
+    list,
+    max,
+    min,
+    name,
+    readonly,
+    required,
+    step,
+    type,
+    value,
+}
+
+export enum EmailAttributes {
     autocomplete,
     disabled,
     form,
@@ -74,7 +81,7 @@ enum EmailAttributes {
     value,
 }
 
-enum FileAttributes {
+export enum FileAttributes {
     accept,
     capture,
     disabled,
@@ -88,7 +95,7 @@ enum FileAttributes {
     value,
 }
 
-enum HiddenAttributes {
+export enum HiddenAttributes {
     autocomplete,
     disabled,
     form,
@@ -97,7 +104,7 @@ enum HiddenAttributes {
     value,
 }
 
-enum MonthAttributes {
+export enum MonthAttributes {
     autocomplete,
     disabled,
     form,
@@ -112,7 +119,7 @@ enum MonthAttributes {
     value,
 }
 
-enum NumberAttributes {
+export enum NumberAttributes {
     autocomplete,
     disabled,
     form,
@@ -128,7 +135,7 @@ enum NumberAttributes {
     value,
 }
 
-enum PasswordAttributes {
+export enum PasswordAttributes {
     autocomplete,
     disabled,
     form,
@@ -144,7 +151,7 @@ enum PasswordAttributes {
     value,
 }
 
-enum RadioAttributes {
+export enum RadioAttributes {
     checked,
     disabled,
     form,
@@ -155,7 +162,7 @@ enum RadioAttributes {
     value,
 }
 
-enum RangeAttributes {
+export enum RangeAttributes {
     autocomplete,
     disabled,
     form,
@@ -168,7 +175,7 @@ enum RangeAttributes {
     value,
 }
 
-enum ResetAttributes {
+export enum ResetAttributes {
     autocomplete,
     disabled,
     form,
@@ -180,7 +187,7 @@ enum ResetAttributes {
     value,
 }
 
-enum SearchAttributes {
+export enum SearchAttributes {
     autocomplete,
     dirname,
     disabled,
@@ -198,7 +205,7 @@ enum SearchAttributes {
     value,
 }
 
-enum ImageAttributes {
+export enum ImageAttributes {
     alt,
     autocomplete,
     disabled,
@@ -218,7 +225,7 @@ enum ImageAttributes {
     width,
 }
 
-enum SubmitAttributes {
+export enum SubmitAttributes {
     disabled,
     form,
     formaction,
@@ -233,7 +240,7 @@ enum SubmitAttributes {
     value,
 }
 
-enum TelAttributes {
+export enum TelAttributes {
     autocomplete,
     disabled,
     form,
@@ -250,7 +257,7 @@ enum TelAttributes {
     value,
 }
 
-enum TextAttributes {
+export enum TextAttributes {
     autocomplete,
     dirname,
     disabled,
@@ -268,7 +275,7 @@ enum TextAttributes {
     value,
 }
 
-enum TimeAttributes {
+export enum TimeAttributes {
     autocomplete,
     disabled,
     form,
@@ -283,7 +290,7 @@ enum TimeAttributes {
     value,
 }
 
-enum UrlAttributes {
+export enum UrlAttributes {
     autocomplete,
     disabled,
     form,
@@ -300,7 +307,7 @@ enum UrlAttributes {
     value,
 }
 
-enum WeekAttributes {
+export enum WeekAttributes {
     autocomplete,
     disabled,
     form,
@@ -314,3 +321,28 @@ enum WeekAttributes {
     type,
     value,
 }
+
+export const InputAttributes = {
+    button: ButtonAttributes,
+    checkbox: CheckboxAttributes,
+    color: ColorAttributes,
+    date: DateAttributes,
+    'datetime-local': DatetimeLocalAttributes,
+    email: EmailAttributes,
+    file: FileAttributes,
+    hidden: HiddenAttributes,
+    month: MonthAttributes,
+    number: NumberAttributes,
+    password: PasswordAttributes,
+    radio: RadioAttributes,
+    range: RangeAttributes,
+    reset: ResetAttributes,
+    search: SearchAttributes,
+    image: ImageAttributes,
+    submit: SubmitAttributes,
+    tel: TelAttributes,
+    text: TextAttributes,
+    time: TimeAttributes,
+    url: UrlAttributes,
+    week: WeekAttributes,
+};
