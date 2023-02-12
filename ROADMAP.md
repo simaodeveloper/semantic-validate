@@ -2,3 +2,4 @@
 - [] handle errors
 - [] add unit tests
 - [] identify more scenarios to coverage more
+- [] block main branch to receive directly merge, just for PRs
