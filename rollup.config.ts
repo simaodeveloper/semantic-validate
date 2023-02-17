@@ -3,9 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
 import pkg from './package.json' assert { type: "json" };
 
-console.log(pkg);
-
-
 const isProd = () => process.env.BUILD === 'production';
 const createUMDName = (name: string) => name
     .split('-')

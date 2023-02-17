@@ -25,14 +25,14 @@ export default class Core extends Emitter {
     constructor(selector: string, options: Options = {}) {
         super();
         
-        const form: HTMLFormElement = document.querySelector(selector) as HTMLFormElement;
+        this.form = document.querySelector(selector) as HTMLFormElement;
         
-        if (!form) {
-            SemanticValidateError.catch(new SemanticValidateError(`The form element with the [${selector}] doesn't exists!`))
+        if (!this.form) {
+            SemanticValidateError.catch(
+                new SemanticValidateError(`The form element with the [${selector}] doesn't exists!`)
+            );
         }
         
-        // @ts-ignore: typescript don't manage WeakMap types
-        this.form = form;
         this.options = this.setOptions(options);
         this.schemas = new Map();
         this.isRulesBinded = {};
@@ -104,13 +104,13 @@ export default class Core extends Emitter {
             : [element];
     }
 
-    private bindSchemaWithElements(name: string) {
-        const elementName = name as keyof typeof this.form.elements;
-        const element = this.form.elements[elementName];
-
+    private bindSchemaWithElementsOnce(name: string) {
         // TODO: verify if is important to check the element and throw an error
         if (!this.isRulesBinded[name]) {
             this.isRulesBinded[name] = true;
+
+            const elementName = name as keyof typeof this.form.elements;
+            const element = this.form.elements[elementName];
             const elements = this.elementsToArray(element as Element) as Array<Element>;
             const schema = this.schemas.get(name) as Schema;
             elements.forEach((element) => this.setSchemaIntoElements(element, schema));
@@ -125,7 +125,7 @@ export default class Core extends Emitter {
             // const pattern = rule.get('pattern');
             const target = event.target as HTMLInputElement;
 
-            this.bindSchemaWithElements(target.name);
+            this.bindSchemaWithElementsOnce(target.name);
             
             // if (typeof pattern === 'function') {
             //     if (!pattern(event.target.value)) {
@@ -152,7 +152,7 @@ export default class Core extends Emitter {
             event.preventDefault();
 
             for (const [name] of this.schemas) {
-                this.bindSchemaWithElements(name);
+                this.bindSchemaWithElementsOnce(name);
             }
             
 
@@ -238,9 +238,9 @@ export default class Core extends Emitter {
 
             return [name, value];
         }
-
+        
         Array
-            .from(Object.entries(new FormData(this.form)))
+            .from(new FormData(this.form).entries())
             .map(pipe(
                 transformSelectMultipleValue
             ))

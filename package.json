@@ -16,7 +16,7 @@
     "dev": "rollup --config rollup.config.ts --configPlugin typescript --environment BUILD:development --watch",
     "build": "rollup --config rollup.config.ts --configPlugin typescript --environment BUILD:production",
     "test": "jest",
-    "typecheck": "tsc lib/index.ts --noEmit --downlevelIteration"
+    "typecheck": "tsc --project tsconfig.json --noEmit --downlevelIteration"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.18.6",

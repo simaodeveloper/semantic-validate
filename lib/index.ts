@@ -1,8 +1,7 @@
 import { Schema, SemanticValidate } from './core';
-import { Options } from './types/types';
+import { Options, TypeOptions } from './types/types';
 
-// @ts-ignore: typescript don't manage spread operator in new 
-export const schema = (...args): Schema => new Schema(...args);
+export const schema = (value?: string, options?: TypeOptions): Schema => new Schema(value, options);
 
 export const createValidation = (selector: string, options: Options) => new SemanticValidate(selector, options);
 

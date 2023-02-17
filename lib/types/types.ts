@@ -84,4 +84,4 @@ export type SubmitResult = {
     serialized?: string;
 };
 
-export type FieldsPropValue = string | number | boolean | ((value: string) => boolean);
+export type FieldPropValue = string | number | boolean | ((value: string) => boolean);

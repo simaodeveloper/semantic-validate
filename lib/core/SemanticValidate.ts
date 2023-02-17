@@ -1,4 +1,4 @@
-import Core from "./core";
+import Core from "./Core";
 import CustomError from "./CustomError";
 import {  Options, SchemaRules } from "../types/types";
 

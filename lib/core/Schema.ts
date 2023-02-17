@@ -1,5 +1,4 @@
 import { Pattern, SchemaAttributeValue, SchemaRuleValue, TypeOptions } from "../types/types";
-import Fields from "./Fields";
 
 export default class Schema {
     rule: Map<string, SchemaRuleValue>;

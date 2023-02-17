@@ -4,7 +4,7 @@ export default class CustomError extends Error {
         this.name = 'SemanticValidateError';
     }
 
-    static catch(error) {
+    static catch(error: unknown) {
         console.error(error)
     }
 }

@@ -1,56 +1,53 @@
 import SemanticValidateError from "./CustomError";
 
+type Listeners = ((...args: any) => void)[];
+
 export default class Emitter {
-    listeners: {};
+    listeners: Map<string, Listeners>;
 
     constructor() {
-        this.listeners = {};
+        this.listeners = new Map<string, Listeners>();
     }
 
     public on(event: string, fn: (...args: any) => void) {
-        if (!this.listeners) {
-            this.listeners = {};
+        if (!this.listeners.get(event)) {
+            return this.listeners.set(event, [fn]);
         }
 
-        if (!this.listeners[event]) {
-            return this.listeners[event] = [fn];
-        }
+        const listeners = this.listeners.get(event) as Listeners;
+        const newListeners = [...listeners, fn];
 
-        this.listeners[event] = [...this.listeners[event], fn];
+        this.listeners.delete(event);
+        this.listeners.set(event, newListeners);
 
         return this;
     } 
 
     public off(event: string, fn: (...args: any) => void) {
-        if (!this.listeners) {
-            this.listeners = {};
-        }
-
-        if (!this.listeners[event]) {
+        if (!this.listeners.get(event)) {
             throw new SemanticValidateError(`The event [${event}]' doesn't exists!`);
         }
 
-        const listener = this.listeners[event].find(listener => listener === fn);
+        const listeners = this.listeners.get(event) as Listeners;
+        const listener = listeners.find(listener => listener === fn);
 
         if (!listener) {
             throw new SemanticValidateError(`The listener in specific doesn't exists!`)
         }
 
-        this.listeners[event] = this.listeners[event].filter(listener => listener !== fn);
+        const newListeners = listeners.filter(listener => listener !== fn);
+        this.listeners.set(event, newListeners);
 
         return this;
     }
 
     public emit<T extends Array<unknown>>(event: string, ...args: T) {
-        if (!this.listeners) {
-            this.listeners = {};
-        }
-
-        if (!this.listeners[event]) {
+        if (!this.listeners.get(event)) {
             throw new SemanticValidateError(`The event [${event}]' doesn't exists!`);
         }
 
-        this.listeners[event].forEach(listener => listener(...args));
+        const listeners = this.listeners.get(event) as Listeners;
+        listeners.forEach(listener => listener(...args));
 
         return this;
     }
