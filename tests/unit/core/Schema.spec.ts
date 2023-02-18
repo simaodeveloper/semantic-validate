@@ -1,4 +1,4 @@
-import { Schema } from "../../lib/core";
+import { Schema } from "../../../lib/core";
 
 describe('Schema Class', () => {
     it('should create a type text required schema', () => {

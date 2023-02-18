@@ -16,7 +16,7 @@ export default class Schema {
     }
 
     type(value: string = 'text', options: TypeOptions = {}) {
-        if (new Map(Object.entries(options)).size !== 0) {            
+        if (JSON.stringify(options) !== '{}') {          
             for (const [attribute, value] of Object.entries(options)) {
                 this.attributes.set(attribute, value);
             }        

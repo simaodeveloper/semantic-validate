@@ -120,6 +120,8 @@ export default class Core extends Emitter {
     }
 
     private setEvents(): Core {
+        this.on('form:submit', () => {});
+
         const onInput = (event: Event) => {
             // const rule = this.rules.get(event.target.name);
             // const pattern = rule.get('pattern');
@@ -154,7 +156,6 @@ export default class Core extends Emitter {
             for (const [name] of this.schemas) {
                 this.bindSchemaWithElementsOnce(name);
             }
-            
 
             const data = this.getData();       
 
@@ -220,9 +221,8 @@ export default class Core extends Emitter {
         const transformSelectMultipleValue = ([name, value]: [string, SchemaAttributeValue]) => {
             const schema = this.schemas.get(name) as Schema;
             const elementName = name as keyof typeof this.form.elements;
-             
-            // TODO: remember why this validation
-            if (schema.rule.size === 0) {
+            
+            if (!schema) {
                 return [name, value];
             }
 

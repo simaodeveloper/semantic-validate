@@ -2,17 +2,17 @@ import type { Config } from 'jest';
 
 const config: Config = {
   preset: 'ts-jest',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   notify: true,
   extensionsToTreatAsEsm: [
     '.ts'
   ],
-  maxWorkers: '50%',
   moduleDirectories: [
     'node_modules'
   ],
+  coverageDirectory: '<rootDir>/coverage',
   collectCoverageFrom: [
-    '**/*.{ts}',
+    '<rootDir>/lib/**/*.ts',
     '!**/tests/**',
     '!**/enums/**',
     '!**/types/**',
@@ -20,7 +20,7 @@ const config: Config = {
     '!**/vendor/**',
   ],
   coverageReporters: [
-    'json'
+    'json', "lcov", "text"
   ],
   coverageThreshold: {
     global: {
