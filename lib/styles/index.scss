@@ -1,0 +1,26 @@
+[data-sv-init="true"] {
+    input[type="radio"] {
+        display: inline-block;
+        margin-bottom: 8px;
+    
+        + label {
+            vertical-align: top;
+        }
+    }
+    
+    [data-sv-valid=false] {
+        &:is(input) {
+            border: 1px solid red;
+        }
+    
+        &:is(textarea) {
+            border: 1px solid red;
+        }
+    
+        &:is(select) {
+            border: 1px solid red;
+        }
+    }
+}
+
+

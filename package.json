@@ -6,6 +6,7 @@
   "module": "dist/semantic-validate.esm.mjs",
   "browser": "dist/semantic-validate.umd.js",
   "types": "dist/semantic-validate.d.ts",
+  "style": "dist/semantic-validate.css",
   "license": "MIT",
   "files": [
     "dist",
@@ -15,7 +16,9 @@
   "scripts": {
     "dev": "rollup --config rollup.config.ts --configPlugin typescript --environment BUILD:development --watch",
     "build": "rollup --config rollup.config.ts --configPlugin typescript --environment BUILD:production",
-    "test": "jest --maxWorkers=2 --coverage",
+    "test": "jest --verbose --runInBand --silent=false",
+    "test:coverage": "jest --maxWorkers=2 --coverage",
+    "test:watch": "yarn test --watchAll",
     "typecheck": "tsc --project tsconfig.json --noEmit --downlevelIteration"
   },
   "devDependencies": {
@@ -37,6 +40,7 @@
     "rollup-plugin-dts": "^5.1.1",
     "rollup-plugin-esbuild": "^5.0.0",
     "rollup-plugin-import-assert": "^2.1.3",
+    "rollup-plugin-sass": "^1.12.17",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",

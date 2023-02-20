@@ -1,12 +1,14 @@
-import SemanticValidateError from './CustomError';
 import Emitter from './Emitter';
-import { Options, SchemaAttributes, SchemaAttributeValue, SchemaRules, SchemaRuleValue, SubmitResult } from '../types/types';
+import { Dictionary, Field, Messages, Options, SchemaAttributes, SchemaAttributeValue, SchemaRules, SubmitResult } from '../types/types';
 import { getType, pipe } from '../utils/utils';
 import CustomError from './CustomError';
 import Schema from './Schema';
+import defaultMessages from '../messages';
+import { AdapterConstraint, FieldStatus } from '../enums';
 
 export default class Core extends Emitter {
     form: HTMLFormElement;
+    fields: Map<string, Field[]>;
     options: Options;
     schemas: Map<string, Schema>;
     isRulesBinded: {
@@ -16,6 +18,7 @@ export default class Core extends Emitter {
         hash: Map<string, string | string[]>;
         serialized: URLSearchParams;
     };
+    messages: Messages;
 
     /**
      * 
@@ -26,10 +29,11 @@ export default class Core extends Emitter {
         super();
         
         this.form = document.querySelector(selector) as HTMLFormElement;
-        
+        this.fields = this.extractElementsFromForm();
+
         if (!this.form) {
-            SemanticValidateError.catch(
-                new SemanticValidateError(`The form element with the [${selector}] doesn't exists!`)
+            CustomError.catch(
+                new CustomError(`The form element with the [${selector}] doesn't exists!`)
             );
         }
         
@@ -40,10 +44,34 @@ export default class Core extends Emitter {
             hash: new Map(),
             serialized: new URLSearchParams(),
         };
+        this.messages = {
+            defaults: {...defaultMessages},
+            schemas: {},
+        };
 
         if (this.options.schemas) {
             this.setSchemas(this.options.schemas);
         }
+
+        if (this.options.messages) {
+            this.setMessages(this.options.messages);
+        }
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+    private extractElementsFromForm(): Map<string, Field[]> {
+        const fields = Array
+            .from(this.form.elements as unknown as Field[])
+            .filter(element => (element.localName !== 'button'))
+            .reduce((acc: Dictionary<Field[]>, next: Field) => ({
+                ...acc,
+                [next.name]: [...(acc[next.name] || []), next]
+            }), {});   
+            
+        return new Map(Object.entries(fields));
     }
 
     /**
@@ -69,7 +97,7 @@ export default class Core extends Emitter {
     protected setSchemas(schemas: SchemaRules): Core {
         for(const [name, schema] of Object.entries(schemas)) {
             if (this.schemas.has(name)) {
-                throw new SemanticValidateError(`The ${name} rule already exists!`);
+                throw new CustomError(`The ${name} rule already exists!`);
             }
 
             this.schemas.set(name, schema);
@@ -77,6 +105,80 @@ export default class Core extends Emitter {
         }
 
         return this.setup();
+    }
+
+    /**
+     * 
+     * @param messages 
+     */
+    protected setMessages(messages: Messages) {
+        this.messages.defaults = {
+            ...messages.defaults,
+            ...this.messages.defaults,
+        };
+
+        for (const name in messages.schemas) {                                                    
+        } 
+    }
+
+    /**
+     * 
+     * @param rule 
+     * @param name 
+     * @returns 
+     */
+    protected handleMessage(rule: string, name: string): Core {
+        const messageEl = this.form.querySelectorAll(`[data-sv-name="${name}"]`);
+
+        if (messageEl.length > 0)
+            messageEl[messageEl.length - 1].remove();
+
+        if (rule === 'valid') 
+            return this;        
+        
+        let message: string = '';
+        
+        if (JSON.stringify(this.messages.defaults) !== '{}') {
+            message = this.messages.defaults?.[rule];
+        }
+
+        const wrapper = document.createElement('span');
+        wrapper.setAttribute('arial-labelly', name);
+        wrapper.setAttribute('data-sv-name', name);
+        wrapper.setAttribute('data-sv-rule', rule);
+        wrapper.classList.add('error-message');
+        wrapper.textContent = message;
+
+        const fields = this.fields.get(name) as Field[];
+        const target = fields.at(-1) as Field;
+
+        if (fields.length > 1) {
+            (<ParentNode>target.parentNode).append(wrapper);
+        } else {
+            (<ChildNode>target).after(wrapper);
+        }
+        
+        return this;
+    }
+
+    /**
+     * 
+     * @param rule 
+     * @param name 
+     * @returns 
+     */
+    private handleStyle(rule: string, field: Field) {  
+        field.setAttribute('data-sv-valid', (rule === 'valid').toString());
+        return this;
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+    private initStyleValition() {
+        this.form.setAttribute('data-sv-init', "true");
+        return this;
     }
 
     /**
@@ -89,62 +191,80 @@ export default class Core extends Emitter {
         return this;
     }
 
-    private setSchemaIntoElements(element: Element, schema: Schema): Core {    
-        for(const [ruleAttr, value] of schema.rule) {
-              if (getType(value) === 'function') continue;
-            element.setAttribute(ruleAttr, value as string);
+    /**
+     * 
+     * @param field 
+     * @param schema 
+     * @returns 
+     */
+    private setSchemaIntoField(field: Field): Core {
+        const schema = this.schemas.get(field.name) as Schema;
+
+        for (const [rule, value] of schema.rule) {
+            if (getType(value) === 'function') continue;
+            field.setAttribute(rule, String(value));
         }
 
         return this;
     }
 
-    private elementsToArray(element: Node | RadioNodeList): Node[] {
-        return (element instanceof RadioNodeList)
-            ? Array.from(element)
-            : [element];
-    }
+    /**
+     * 
+     * @param field 
+     * @returns 
+     */
+    private bindSchemaWithFieldOnce(field: Field): Core {
 
-    private bindSchemaWithElementsOnce(name: string) {
-        // TODO: verify if is important to check the element and throw an error
-        if (!this.isRulesBinded[name]) {
-            this.isRulesBinded[name] = true;
+        if (!this.schemas.get(field.name)) return this;
 
-            const elementName = name as keyof typeof this.form.elements;
-            const element = this.form.elements[elementName];
-            const elements = this.elementsToArray(element as Element) as Array<Element>;
-            const schema = this.schemas.get(name) as Schema;
-            elements.forEach((element) => this.setSchemaIntoElements(element, schema));
+        if (!this.isRulesBinded[field.name]) {
+            this.isRulesBinded[field.name] = true;
+            this.setSchemaIntoField(field);
         }
 
         return this;
     }
 
+    /**
+     * 
+     * @param field 
+     * @returns 
+     */
+    private validate(field: Field): [string, string] {
+        this.bindSchemaWithFieldOnce(field);
+
+        // TODO: do function validation
+
+        const constraint = this.transformConstraint(
+            field.getAttribute('name') as string,
+            field.validity,
+        ) as [string, string];
+
+        return constraint;
+    }
+
+    /**
+     * 
+     * @param field 
+     * @returns 
+     */
+    private bindValidation(field: Field): Core {
+        const constraint = this.validate(field);
+        this.handleStyle(constraint[0], field);
+        this.handleMessage(constraint[0], field.name);
+
+        return this;
+    }
+
+    /**
+     * 
+     * @returns 
+     */
     private setEvents(): Core {
         this.on('form:submit', () => {});
 
         const onInput = (event: Event) => {
-            // const rule = this.rules.get(event.target.name);
-            // const pattern = rule.get('pattern');
-            const target = event.target as HTMLInputElement;
-
-            this.bindSchemaWithElementsOnce(target.name);
-            
-            // if (typeof pattern === 'function') {
-            //     if (!pattern(event.target.value)) {
-            //         // TODO: emit input:error
-            //         // return this.emit('field:error', {});
-            //     }
-            // }
-
-            // if (Fields[event.target.localName]) {
-            //     const constraint = this.transformConstraint(
-            //         event.target.getAttribute('name'),
-            //         event.target.validity,
-            //     );
-
-            //     // console.log(constraint);
-                
-            // }
+            this.bindValidation(event.target as Field);
         };
 
         this.form.removeEventListener('input', onInput);
@@ -153,11 +273,11 @@ export default class Core extends Emitter {
         const onSumit = (event: SubmitEvent) => {
             event.preventDefault();
 
-            for (const [name] of this.schemas) {
-                this.bindSchemaWithElementsOnce(name);
+            for (const [, fields] of this.fields) {
+                this.bindValidation(fields[0]);
             }
 
-            const data = this.getData();       
+            const data = this.getData();
 
             const result = {
                 valid: this.form.checkValidity(),
@@ -176,46 +296,33 @@ export default class Core extends Emitter {
         return this;
     }
 
+    /**
+     * 
+     * @param name 
+     * @param validityState 
+     * @returns 
+     */
     private transformConstraint(name: string, validityState: ValidityState) {
-        const constraintErrors = [
-            'badInput',
-            'customError',
-            'patternMismatch',
-            'rangeOverflow',
-            'rangeUnderflow',
-            'stepMismatch',
-            'tooLong',
-            'tooShort',
-            'typeMismatch',
-            'valid',
-            'valueMissing',
-        ];
-
-        const adapterConstraint = {
-            'badInput': 'type',
-            'customError': 'customError',
-            'patternMismatch': 'pattern',
-            'rangeOverflow': 'max',
-            'rangeUnderflow': 'min',
-            'stepMismatch': 'step',
-            'tooLong': 'maxlength',
-            'tooShort': 'minlength',
-            'typeMismatch': 'type',
-            'valid': 'valid',
-            'valueMissing': 'required',
-        }
-
-        for (const constraint of constraintErrors) {
+        for (const constraint of Object.values(FieldStatus)) {          
             if (validityState[constraint as keyof typeof validityState]) {
-                return [adapterConstraint[constraint as keyof typeof validityState], name]; 
+                return [AdapterConstraint[constraint as keyof typeof validityState], name]; 
             }
         }        
     }
 
+    /**
+     * 
+     * @param value 
+     * @returns 
+     */
     private sanitize(value: FormDataEntryValue) {
         return String(this.options.sanitize?.(value as string));
     }
 
+    /**
+     * 
+     * @returns 
+     */
     protected getData() {
 
         const transformSelectMultipleValue = ([name, value]: [string, SchemaAttributeValue]) => {
@@ -259,36 +366,80 @@ export default class Core extends Emitter {
         return this.data;
     }
 
+    /**
+     * 
+     * @param name 
+     * @param attributes 
+     * @returns 
+     */
     private setAttributes(name: string, attributes: SchemaAttributes) {
-        const elementName = name as keyof typeof this.form.elements;
-        const element = this.form.elements[elementName] as Element;
+        const field = this.fields.get(name);
 
-        if (attributes.size !== 0) {
+        if (field === undefined) return this;
+
+        field.forEach((field) => {
+            
+            if (attributes.size === 0) return false;
+            
             for (const [attr, value] of attributes) {
-                element.setAttribute(attr, value as string);
+                field.setAttribute(attr, value as string);
 
-                if (attr === 'multiple') {
-                    const option = element.querySelector('option');
+                if (attr !== 'multiple') continue;
+
+                const option = field.querySelector('option');
                     
-                    if (option) {
-                        option.selected = false;
-                    } 
-                }
+                if (option) {
+                    option.selected = false;
+                } 
             }
+        });
+        
+        return this;
+    }
+
+    private addWrapperToCollection(): Core {
+        
+        for (const [name, fields] of this.fields) {
+            if (fields.length === 1) continue;
+            
+            const wrapper = document.createElement('div');
+
+            wrapper.setAttribute('data-sv-collection', name);
+            
+            const parent = fields[0].parentNode as ParentNode;
+
+            Array
+                .from(parent.children as HTMLCollection)
+                .forEach(field => {
+                    wrapper.append(field);
+                });
+
+            parent.append(wrapper);
         }
         
         return this;
     }
 
+    /**
+     * 
+     * @returns 
+     */
     private setup(): Core {
         try {
             this
+                .addWrapperToCollection()
                 .disableNativeValidation()
+                .initStyleValition()
                 .setEvents();
         } catch(error) {
             CustomError.catch(error);
         }
 
+        return this;
+    }
+
+    public destroy(): Core {
+        // back to the original html
         return this;
     }
 }

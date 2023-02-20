@@ -7,3 +7,4 @@
     - dependsOn method in schema
     - event for error and success for each field
     - method for masks like schema 
+- Enable import css directly from module with https://jaketrent.com/post/package-json-style-attribute/

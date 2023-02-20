@@ -1,34 +1,11 @@
 import { Schema } from "../core";
 
-declare global {
-    interface WeakRef<T extends object> {
-        readonly [Symbol.toStringTag]: "WeakRef";
-    
-        /**
-         * Returns the WeakRef instance's target object, or undefined if the target object has been
-         * reclaimed.
-         */
-        deref(): T | undefined;
-    }
-    
-    interface WeakRefConstructor {
-        readonly prototype: WeakRef<any>;
-    
-        /**
-         * Creates a WeakRef instance for the given target object.
-         * @param target The target object for the WeakRef instance.
-         */
-        new<T extends object>(target: T): WeakRef<T>;
-    }
-}
-
-declare var WeakRef: WeakRefConstructor;
-
 export type Options = {
     sanitize?: (value: string) => string;
     serialized?: boolean;
     novalidate?: boolean;
     schemas?: SchemaRules;
+    messages?: Messages;
 };
 
 export type Form = WeakRef<HTMLFormElement>;
@@ -65,7 +42,7 @@ export type SchemaRuleValue = string | number | boolean | ((value: string) => bo
 
 export type SchemaAttributeValue = string | number | boolean;
 
-export type SchemaAttributes =  Map<string, SchemaAttributeValue>;
+export type SchemaAttributes = Map<string, SchemaAttributeValue>;
 
 
 export type TypeOptions = {
@@ -85,3 +62,23 @@ export type SubmitResult = {
 };
 
 export type FieldPropValue = string | number | boolean | ((value: string) => boolean);
+
+export type Messages = {
+    defaults: {
+        [rule: string]: string;
+    };
+    schemas: {
+        [name: string]: {
+            [rule: string]: string;
+        };
+    };
+};
+
+export type Field =
+    | HTMLInputElement
+    | HTMLSelectElement
+    | HTMLTextAreaElement;
+
+export type Dictionary<T> = {
+    [key: string]: T
+}

@@ -1,6 +1,7 @@
 import dts from 'rollup-plugin-dts'
 import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
+import sass from 'rollup-plugin-sass'
 import pkg from './package.json' assert { type: "json" };
 
 const isProd = () => process.env.BUILD === 'production';
@@ -15,13 +16,20 @@ const plugins = [
         minify: isProd(),
     }),
     commonjs(),
-];
+    sass({ 
+        output: `./dist/${pkg.name}.css`,
+        options: {
+            outFile: `./dist/${pkg.name}.css`,
+            sourceMap: !isProd(),
+            outputStyle: isProd() ? 'compressed' : 'expanded',
+        },
+    })
+]; 
 
 export default [
     {
         plugins,
         input: 'lib/index.ts',
-        external: ['dompurify'],
         output: [
             {
                 file: pkg.main,
@@ -47,6 +55,7 @@ export default [
     {
         plugins: [dts()],
         input: 'lib/index.ts',
+        external: ['./styles/index.scss'],
         output: [
             {
                 file: pkg.types,

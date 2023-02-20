@@ -12,12 +12,7 @@ const config: Config = {
   ],
   coverageDirectory: '<rootDir>/coverage',
   collectCoverageFrom: [
-    '<rootDir>/lib/**/*.ts',
-    '!**/tests/**',
-    '!**/enums/**',
-    '!**/types/**',
-    '!**/node_modules/**',
-    '!**/vendor/**',
+    '<rootDir>/lib/**',
   ],
   coverageReporters: [
     'json', "lcov", "text"
